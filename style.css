@@ -1,0 +1,257 @@
+/* ===================================================================
+   Jogo Infantil – Pré-escolar II
+   Layout baseado no protótipo do Figma (tela de 1920 × 1080).
+   O "palco" é redimensionado por JavaScript para caber em qualquer tela.
+   =================================================================== */
+
+@font-face { font-family: 'Cherry Bomb One'; src: url('fontes/cherry-bomb-one.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Bungee'; src: url('fontes/bungee.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Chau Philomene One'; src: url('fontes/chau-philomene-one.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Crimson Text'; src: url('fontes/crimson-text.woff2') format('woff2'); font-display: swap; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #badebd; }
+button, input { font-family: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 6px solid #f9a23e; outline-offset: 4px; }
+
+#stage {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+  transform-origin: 0 0; overflow: hidden; background: #badebd;
+  font-family: 'Crimson Text', Georgia, serif; user-select: none;
+}
+#fundo { position: absolute; inset: 0; }
+#fundo img { width: 100%; height: 100%; object-fit: cover; opacity: var(--fundo, 1); transition: opacity .45s; display: block; }
+
+.tela { position: absolute; inset: 0; display: none; }
+.tela.ativa { display: block; animation: entra .35s ease-out; }
+
+/* ----------------------------- painéis ----------------------------- */
+.painel { position: absolute; border-style: solid; border-color: #7ca576; }
+.painel-login { left: 610px; top: 126px; width: 699px; height: 828px; border-width: 15px; border-radius: 65px; background: rgba(232,234,235,.8); }
+.painel-fb    { left: 449px; top: 132px; width: 1022px; height: 815px; border-width: 12px; border-radius: 40px; background: rgba(171,196,212,.72); }
+.painel-erro  { left: 300px; top: 125px; width: 1319px; height: 829px; border-width: 15px; border-radius: 65px; background: rgba(171,196,212,.62); }
+
+/* ------------------------------ login ------------------------------ */
+.titulo-login, .titulo-nivel {
+  position: absolute; left: 610px; width: 699px; text-align: center;
+  font: 400 48px/1.1 'Cherry Bomb One', 'Arial Rounded MT Bold', sans-serif; color: #0d5d22;
+}
+.titulo-login { top: 166px; }
+.titulo-nivel { top: 208px; }
+
+.campo {
+  position: absolute; left: 735px; width: 450px; height: 92px;
+  border: 5px solid #7ca576; border-radius: 30px; background: #fbfdfe;
+  padding: 0 37px; font: 400 24px 'Crimson Text', Georgia, serif; color: #1b1b1b; outline: none;
+}
+.campo::placeholder { color: rgba(0,0,0,.6); }
+.campo:focus { border-color: #4aa350; box-shadow: 0 0 0 6px rgba(74,163,80,.28); }
+.campo-botao { text-align: left; color: rgba(0,0,0,.6); }
+.chevron { position: absolute; left: 1124px; width: 32px; height: 32px; pointer-events: none; }
+.erro-campo { border-color: #d32f2f !important; animation: tremer .45s; }
+
+.btn-redondo {
+  position: absolute; left: 877px; top: 748px; width: 165px; height: 165px; border-radius: 50%;
+  border: 6px solid #1e6b32; background: radial-gradient(circle at 35% 28%, #46ad5c, #23813a 72%);
+  font: 400 40px 'Cherry Bomb One', sans-serif; color: #fff;
+  text-shadow: 0 3px 0 #063e15, 0 0 6px #063e15; box-shadow: 0 10px 16px rgba(0,0,0,.3);
+  transition: transform .15s;
+}
+.btn-redondo:hover, .btn-elipse:hover { transform: scale(1.05); }
+.btn-redondo:active, .btn-elipse:active { transform: scale(.97); }
+.aviso-login { position: absolute; left: 610px; width: 699px; top: 702px; text-align: center; font: 700 26px 'Crimson Text', serif; color: #c62828; }
+
+.link-registro {
+  position: absolute; right: 26px; bottom: 16px; background: none; border: none;
+  font: 400 22px 'Crimson Text', serif; color: rgba(0,0,0,.45); text-decoration: underline;
+}
+
+/* ------------------------------ níveis ------------------------------ */
+.nivel-op {
+  position: absolute; left: 610px; width: 699px; height: 78px; background: none; border: none;
+  font: 400 48px/1 'Bungee', 'Arial Black', sans-serif; text-align: center;
+  -webkit-text-stroke: 4px #1b1b1b; paint-order: stroke fill; transition: transform .15s;
+}
+.nivel-op:hover { transform: scale(1.1); }
+.nivel-op[data-nivel="facil"]   { color: #0d5d22; }
+.nivel-op[data-nivel="medio"]   { color: #f9a23e; }
+.nivel-op[data-nivel="dificil"] { color: #d40000; }
+.nivel-op[data-nivel="expert"]  { color: #332887; }
+
+/* ----------------------------- pergunta ----------------------------- */
+.badge {
+  position: absolute; left: 99px; top: 116px; width: 165px; height: 165px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #55b866, #2f8a43 75%); border: 5px solid #1e6b32;
+  box-shadow: 0 8px 12px rgba(0,0,0,.25); font: 400 56px 'Cherry Bomb One', sans-serif; color: #04230c;
+  display: flex; align-items: center; justify-content: center;
+}
+.som {
+  position: absolute; left: 75px; top: 290px; width: 90px; height: 90px; border-radius: 50%;
+  background: #4aa350; border: 5px solid #063e15; display: flex; align-items: center; justify-content: center;
+  transition: transform .15s;
+}
+.som:hover { transform: scale(1.08); }
+.pergunta {
+  position: absolute; left: 334px; top: 96px; width: 1421px; height: 190px;
+  display: flex; align-items: center; font: 400 64px/1.12 'Cherry Bomb One', sans-serif; color: #4aa350;
+  text-shadow: 0 4px 4px rgba(0,0,0,.25);
+}
+.pergunta.longa { font-size: 50px; }
+.pergunta.muito-longa { font-size: 40px; }
+
+.zona {
+  position: absolute; left: 120px; right: 120px; top: 300px; bottom: 50px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+}
+.hero { display: flex; align-items: center; justify-content: center; }
+.hero:empty { display: none; }
+.hero .foto { width: 321px; height: 273px; object-fit: contain; background: #fff; border: 10px solid #abc4d4; }
+.hero .emo { width: 190px; }
+.hero svg { max-width: 780px; height: auto; }
+.hero .seq .emo { width: 140px; }
+.hero .dois-grupos { display: flex; gap: 110px; align-items: center; }
+.hero .grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 420px; }
+.hero .grupo .emo { width: 82px; }
+
+.opcoes { display: flex; gap: 44px; justify-content: center; align-items: flex-start; }
+.opt {
+  position: relative; display: flex; flex-direction: column; background: none; border: none; padding: 0;
+  width: var(--w); transition: transform .15s, opacity .3s;
+}
+.opt:hover:not(.travado) { transform: scale(1.04); }
+.opt:active:not(.travado) { transform: scale(.98); }
+.opt.travado { pointer-events: none; }
+.opt-img {
+  width: 100%; height: var(--h); background: #fff; overflow: hidden;
+  border: 12px solid #7197af; border-bottom-width: 0; border-radius: 50px 50px 0 0;
+  display: flex; align-items: center; justify-content: center; padding: 8px;
+}
+.opt.cor .opt-img { padding: 0; }
+.opt.base .opt-img { align-items: flex-end; padding: 8px 8px 12px; }
+.opt-rotulo {
+  height: 70px; background: #7197af; border-radius: 0 0 50px 50px; padding: 0 22px;
+  display: flex; align-items: center; justify-content: center; text-align: center; white-space: nowrap;
+  font: 400 40px 'Chau Philomene One', 'Arial Rounded MT Bold', sans-serif; color: #0b2a3b;
+}
+/* alternativas só com figura (sem nome embaixo) – como no protótipo */
+.opt.sem-rotulo .opt-img { border: 15px solid rgba(74,163,80,.55); border-radius: 45px; padding: 0; }
+.opt.sem-rotulo .opt-rotulo { display: none; }
+.opt.sem-rotulo.html .opt-img, .opt.sem-rotulo.emoji .opt-img { padding: 10px; }
+
+.opt-img .foto { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.opt.sem-rotulo .opt-img .foto { object-fit: cover; }
+.opt-img .emo { width: 72%; }
+.opt-img svg { max-width: 94%; max-height: 94%; height: auto; }
+.opt-img .seq { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+.opt-img .seq .emo { width: 86px; }
+.opt-img .seq .seta { width: 30px; height: 20px; }
+.bloco-cor { width: 100%; height: 100%; }
+.texto-grande { font: 400 120px/1 'Chau Philomene One', sans-serif; color: #0b2a3b; text-align: center; padding: 6px; word-break: break-word; }
+
+/* tamanhos de acordo com quantidade de alternativas */
+.opcoes.n2 { --w: 440px; --h: 400px; }
+.opcoes.n3 { --w: 380px; --h: 400px; }
+.opcoes.n4 { --w: 320px; --h: 330px; }
+.opcoes.n5 { --w: 250px; --h: 330px; }
+.opcoes.com-hero.n2 { --w: 400px; --h: 240px; }
+.opcoes.com-hero.n3 { --w: 340px; --h: 240px; }
+.opcoes.com-hero.n4 { --w: 262px; --h: 230px; }
+.opcoes.com-hero.n5 { --w: 220px; --h: 210px; }
+.opcoes.n5 .opt-rotulo { height: 60px; }
+
+/* resultado da resposta (✔ / ✖) */
+.opt.apagado { opacity: .5; }
+.marca {
+  position: absolute; left: 50%; top: 38%; width: 62%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  pointer-events: none; animation: pop .4s ease-out;
+}
+.opt.tremer { animation: tremer .5s; }
+.opt.pulo { animation: pulo .6s; }
+
+/* ----------------------------- feedback ----------------------------- */
+.muito-bem {
+  position: absolute; left: 449px; width: 1022px; top: 170px; text-align: center; white-space: nowrap;
+  font: 400 128px/1.1 'Cherry Bomb One', sans-serif; color: #f9a23e; text-shadow: 0 4px 4px rgba(0,0,0,.25);
+}
+.muito-bem span { display: inline-block; }
+.mb1 { transform: rotate(-3deg); margin-right: 34px; }
+.mb2 { transform: rotate(3deg); }
+.voce-acertou {
+  position: absolute; left: 449px; width: 1022px; top: 390px; text-align: center; white-space: nowrap;
+  font: 400 64px/1.1 'Cherry Bomb One', sans-serif; color: #fff; text-shadow: 0 4px 4px rgba(0,0,0,.25);
+}
+.voce-acertou-erro { left: 300px; width: 1319px; top: 372px; }
+.voce-acertou-fim  { left: 300px; width: 1319px; top: 340px; }
+.parabens {
+  position: absolute; left: 449px; width: 1022px; top: 508px; text-align: center;
+  font: 400 64px/1.1 'Cherry Bomb One', sans-serif; color: #f9a23e; text-shadow: 0 4px 4px rgba(0,0,0,.25);
+}
+.fim-titulo {
+  position: absolute; left: 300px; width: 1319px; top: 170px; text-align: center;
+  font: 400 128px/1.1 'Cherry Bomb One', sans-serif; color: #f9a23e; text-shadow: 0 4px 4px rgba(0,0,0,.25);
+}
+.titulo-curvo { position: absolute; left: 425px; top: 205px; overflow: visible; }
+.titulo-curvo text { font: 400 92px 'Cherry Bomb One', sans-serif; fill: #f9a23e; filter: drop-shadow(0 4px 4px rgba(0,0,0,.25)); }
+
+.estrelas { position: absolute; }
+.estrelas svg { position: absolute; overflow: visible; }
+.estrelas svg path { fill: none; stroke: #f9a23e; stroke-width: 1.7; stroke-linejoin: round; }
+.estrelas svg.acesa path { fill: #ffd23f; }
+.estrelas svg.acesa { animation: pop .5s ease-out backwards; filter: drop-shadow(0 4px 4px rgba(0,0,0,.2)); }
+.estrelas-acerto { left: 449px; top: 600px; width: 1022px; height: 300px; }
+.estrelas-acerto svg { width: 156px; height: 156px; }
+.estrelas-acerto .e1 { left: 247px; top: 117px; } .estrelas-acerto .e2 { left: 424px; top: 16px; } .estrelas-acerto .e3 { left: 601px; top: 109px; }
+.estrelas-erro, .estrelas-fim { left: 300px; width: 1319px; height: 220px; }
+.estrelas-erro { top: 480px; } .estrelas-fim { top: 450px; }
+.estrelas-erro svg, .estrelas-fim svg { width: 133px; height: 133px; }
+.estrelas-erro .e1, .estrelas-fim .e1 { left: 393px; top: 56px; }
+.estrelas-erro .e2, .estrelas-fim .e2 { left: 593px; top: 9px; }
+.estrelas-erro .e3, .estrelas-fim .e3 { left: 793px; top: 56px; }
+
+.btn-elipse {
+  position: absolute; left: 707px; top: 669px; width: 506px; height: 198px; border-radius: 50%;
+  background: radial-gradient(ellipse at 35% 25%, #46ad5c, #23813a 75%); border: 6px solid #1e6b32; color: #fff;
+  font: 400 40px 'Cherry Bomb One', sans-serif; text-shadow: 0 3px 0 #063e15; box-shadow: 0 10px 16px rgba(0,0,0,.3);
+  transition: transform .15s;
+}
+.btn-fim-1 { top: 610px; height: 190px; }
+.btn-pill {
+  position: absolute; left: 700px; top: 826px; width: 520px; height: 76px; border-radius: 38px; background: #fbfdfe;
+  border: 5px solid #7ca576; color: #2c5d73; font: 400 28px 'Cherry Bomb One', sans-serif; transition: transform .15s;
+}
+.btn-pill:hover { transform: scale(1.04); }
+
+/* ----------------------------- mascotes ----------------------------- */
+.mascotes { position: absolute; pointer-events: none; }
+.mascotes img { position: absolute; height: auto; animation: balanca 2.8s ease-in-out infinite; transform-origin: 50% 100%; }
+.m-acerto-esq { left: 288px; top: 339px; width: 449px; height: 700px; }
+.m-acerto-esq .m-sapo   { left: 20px; top: 0; width: 320px; }
+.m-acerto-esq .m-castor { left: 0; top: 330px; width: 330px; animation-delay: -1s; }
+.m-acerto-dir { left: 1174px; top: 445px; width: 480px; height: 594px; }
+.m-acerto-dir .m-pato { left: 40px; top: 60px; width: 400px; animation-delay: -.5s; }
+.m-erro-esq { left: 190px; top: 462px; width: 449px; height: 562px; }
+.m-erro-esq .m-sapo { left: 30px; top: 0; width: 360px; }
+.m-erro-dir { left: 1317px; top: 430px; width: 480px; height: 594px; }
+.m-erro-dir .m-pato { left: 40px; top: 60px; width: 400px; animation-delay: -.5s; }
+
+/* ----------------------------- registro ----------------------------- */
+.modal { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 50; user-select: text; }
+.modal[hidden] { display: none; }
+.modal-caixa { width: 860px; background: #fbfdfe; border: 8px solid #7ca576; border-radius: 36px; padding: 44px 52px; font: 400 30px/1.4 'Crimson Text', serif; color: #1b1b1b; }
+.modal-caixa h3 { font: 400 48px 'Cherry Bomb One', sans-serif; color: #0d5d22; margin-bottom: 14px; }
+.modal-botoes { display: flex; gap: 18px; margin: 26px 0 18px; flex-wrap: wrap; }
+.modal-botoes button { font: 700 28px 'Crimson Text', serif; padding: 14px 28px; border-radius: 40px; border: 4px solid #7ca576; background: #e8f5e9; color: #0d5d22; }
+.modal-botoes .perigo { border-color: #c62828; background: #ffebee; color: #b71c1c; }
+.modal-nota { font-size: 22px; color: #555; }
+
+/* ---------------------------- animações ---------------------------- */
+@keyframes entra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 70% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); } }
+.estrelas svg.acesa { animation-name: popEstrela; }
+@keyframes popEstrela { 0% { transform: scale(.2) rotate(-30deg); opacity: 0; } 70% { transform: scale(1.2) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+@keyframes tremer { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-12px); } 40% { transform: translateX(12px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+@keyframes pulo { 0%,100% { transform: scale(1); } 40% { transform: scale(1.08) rotate(-1.5deg); } 70% { transform: scale(1.04) rotate(1.5deg); } }
+@keyframes balanca { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg) translateY(-6px); } }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

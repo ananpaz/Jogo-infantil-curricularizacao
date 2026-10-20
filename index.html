@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aprendendo Brincando</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stage">
+  <!-- fundo (a intensidade muda de tela para tela) -->
+  <div id="fundo"><img src="img/fundo.jpg" alt=""></div>
+
+  <!-- ============================ LOGIN ============================ -->
+  <section class="tela ativa" id="tLogin">
+    <div class="painel painel-login"></div>
+    <h1 class="titulo-login">BEM-VINDO AO JOGO!</h1>
+
+    <input class="campo" id="nome" style="top:256px" type="text" maxlength="40" placeholder="NOME" autocomplete="off">
+    <input class="campo" id="escola" style="top:365px" type="text" maxlength="60" placeholder="ESCOLA" list="listaEscolas" autocomplete="off">
+    <datalist id="listaEscolas"></datalist>
+    <svg class="chevron" style="top:395px" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <input class="campo" id="idade" style="top:474px" type="number" inputmode="numeric" min="3" max="12" placeholder="IDADE" autocomplete="off">
+    <button class="campo campo-botao" id="campoNivel" style="top:604px" type="button">
+      <span id="campoNivelTexto">NÍVEL DE DIFICULDADE</span>
+    </button>
+    <svg class="chevron" style="top:634px" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+    <button class="btn-redondo" id="btnJogar" type="button">JOGAR</button>
+    <div id="avisoLogin" class="aviso-login" aria-live="polite"></div>
+
+    <button class="link-registro" id="btnRegistro" type="button">registro das tentativas</button>
+  </section>
+
+  <!-- ===================== ESCOLHA DO NÍVEL ===================== -->
+  <section class="tela" id="tNivel">
+    <div class="painel painel-login"></div>
+    <h2 class="titulo-nivel">Escolha o nível de dificuldade</h2>
+    <button class="nivel-op" data-nivel="facil"   style="top:392px" type="button">FÁCIL</button>
+    <button class="nivel-op" data-nivel="medio"   style="top:499px" type="button">MÉDIO</button>
+    <button class="nivel-op" data-nivel="dificil" style="top:606px" type="button">DIFÍCIL</button>
+    <button class="nivel-op" data-nivel="expert"  style="top:713px" type="button">EXPERT</button>
+  </section>
+
+  <!-- ============================ PERGUNTA ============================ -->
+  <section class="tela" id="tPergunta">
+    <div class="badge" id="qNum">1</div>
+    <button class="som" id="btnOuvir" type="button" aria-label="Ouvir a pergunta">
+      <svg viewBox="0 0 48 48" width="52" height="52"><path d="M8 19h8l10-8v26l-10-8H8z" fill="#063e15"/><path d="M31 17c4 4 4 10 0 14M36 12c7 7 7 17 0 24" fill="none" stroke="#063e15" stroke-width="3.5" stroke-linecap="round"/></svg>
+    </button>
+    <h2 class="pergunta" id="qTexto"></h2>
+    <div class="zona" id="zona">
+      <div class="hero" id="qHero"></div>
+      <div class="opcoes" id="qOpcoes"></div>
+    </div>
+  </section>
+
+  <!-- ============================ ACERTO ============================ -->
+  <section class="tela" id="tAcerto">
+    <div class="painel painel-fb"></div>
+    <div class="muito-bem"><span class="mb1">Muito</span><span class="mb2">bem!</span></div>
+    <div class="voce-acertou" id="acertoPlacar">Você acertou 1 de 1 !</div>
+    <div class="parabens">Parabéns</div>
+    <div class="estrelas estrelas-acerto" id="acertoEstrelas"></div>
+    <div class="mascotes m-acerto-esq"></div>
+    <div class="mascotes m-acerto-dir"></div>
+  </section>
+
+  <!-- ============================= ERRO ============================= -->
+  <section class="tela" id="tErro">
+    <div class="painel painel-erro"></div>
+    <svg class="titulo-curvo" viewBox="0 0 1070 150" width="1070" height="150">
+      <defs><path id="arcoErro" d="M20 120 Q535 20 1050 120"/></defs>
+      <text><textPath href="#arcoErro" startOffset="50%" text-anchor="middle">Não foi dessa vez</textPath></text>
+    </svg>
+    <div class="voce-acertou voce-acertou-erro" id="erroPlacar">Você acertou 1 de 2 !</div>
+    <div class="estrelas estrelas-erro" id="erroEstrelas"></div>
+    <button class="btn-elipse" id="btnTentar" type="button">TENTAR NOVAMENTE</button>
+    <div class="mascotes m-erro-esq"></div>
+    <div class="mascotes m-erro-dir"></div>
+  </section>
+
+  <!-- ============================== FIM ============================== -->
+  <section class="tela" id="tFim">
+    <div class="painel painel-erro"></div>
+    <div class="fim-titulo" id="fimTitulo">Parabéns!</div>
+    <div class="voce-acertou voce-acertou-fim" id="fimPlacar"></div>
+    <div class="estrelas estrelas-fim" id="fimEstrelas"></div>
+    <button class="btn-elipse btn-fim-1" id="btnFimProximo" type="button"></button>
+    <button class="btn-pill btn-fim-2" id="btnFimNivel" type="button">ESCOLHER OUTRO NÍVEL</button>
+    <div class="mascotes m-erro-esq"></div>
+    <div class="mascotes m-erro-dir"></div>
+  </section>
+
+  <!-- ===================== REGISTRO (professores) ===================== -->
+  <div id="modalRegistro" class="modal" hidden>
+    <div class="modal-caixa">
+      <h3>Registro das tentativas</h3>
+      <p id="regInfo"></p>
+      <div class="modal-botoes">
+        <button id="regBaixar" type="button">Baixar .txt</button>
+        <button id="regLimpar" type="button" class="perigo">Apagar registro</button>
+        <button id="regFechar" type="button">Fechar</button>
+      </div>
+      <p class="modal-nota">O registro fica salvo neste computador e neste navegador.
+         Baixe o arquivo antes de trocar de máquina ou limpar os dados do navegador.</p>
+    </div>
+  </div>
+</div>
+
+<script src="perguntas.js"></script>
+<script src="jogo.js"></script>
+</body>
+</html>
