@@ -25,12 +25,11 @@
 
 /* ---------- pastas das imagens ---------- */
 const IMG = {
-  animais: 'img/Animais e seus Habitats/',
-  letras:  'img/Letras e palavras/',
-  silabas: 'img/Consciência silábica/',
+  animais: 'img/animais/',   // "Animais e seus Habitats"
+  letras:  'img/letras/',    // "Letras e palavras"
+  silabas: 'img/silabas/',   // "Consciência silábica"
   emoji:   'img/emoji/'
 };
-
 
 /* ---------- pequenos ajudantes de desenho ---------- */
 const emo = (cod, estilo = '') =>
