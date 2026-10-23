@@ -33,10 +33,20 @@
   }
 
   /* ------------------------------ voz ------------------------------ */
+  /* Primeiro tenta tocar o MP3 gravado (pasta audio/, guiado pelo manifest.json).
+     Se a frase não tiver MP3, ou o arquivo falhar, usa a voz do navegador como reserva. */
   const Voz = {
     voz: null, token: 0,
+    manifesto: {}, pronto: Promise.resolve(),
+    audioAtual: null, encerrarAtual: null,
     disponivel: 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function',
     iniciar() {
+      /* carrega o índice dos áudios: frase -> arquivo .mp3 */
+      this.pronto = fetch('audio/manifest.json')
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((m) => { this.manifesto = m || {}; })
+        .catch(() => { this.manifesto = {}; });
+
       if (!this.disponivel) return;
       const carregar = () => {
         const v = window.speechSynthesis.getVoices();
@@ -46,8 +56,18 @@
       carregar();
       window.speechSynthesis.onvoiceschanged = carregar;
     },
-    parar() { this.token++; if (this.disponivel) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } } },
-    falar(texto) {
+    /* interrompe o MP3 que estiver tocando (e libera quem estava esperando por ele) */
+    pararAudio() {
+      if (this.audioAtual) { try { this.audioAtual.pause(); } catch (e) { /* ignora */ } this.audioAtual = null; }
+      if (this.encerrarAtual) { const f = this.encerrarAtual; this.encerrarAtual = null; f(); }
+    },
+    parar() {
+      this.token++;
+      this.pararAudio();
+      if (this.disponivel) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
+    },
+    /* voz do navegador (reserva) */
+    falarNavegador(texto) {
       return new Promise((resolve) => {
         if (!this.disponivel || !texto) return resolve();
         const u = new window.SpeechSynthesisUtterance(texto);
@@ -60,9 +80,31 @@
         try { window.speechSynthesis.speak(u); } catch (e) { acabar(); }
       });
     },
+    /* toca o MP3 da frase; se não houver ou falhar, usa a voz do navegador */
+    falar(texto) {
+      return this.pronto.then(() => new Promise((resolve) => {
+        const arquivo = texto ? this.manifesto[texto] : null;
+        if (!arquivo) { this.falarNavegador(texto).then(resolve); return; }
+        const audio = new Audio('audio/' + arquivo);
+        let fim = false;
+        const limpar = () => {
+          if (this.audioAtual === audio) this.audioAtual = null;
+          if (this.encerrarAtual === encerrar) this.encerrarAtual = null;
+        };
+        const encerrar = () => { if (fim) return; fim = true; limpar(); resolve(); };
+        const reserva = () => { if (fim) return; fim = true; limpar(); this.falarNavegador(texto).then(resolve); };
+        audio.onended = encerrar;
+        audio.onerror = reserva;
+        this.audioAtual = audio; this.encerrarAtual = encerrar;
+        setTimeout(encerrar, 30000);                      // nunca trava o jogo
+        const p = audio.play();
+        if (p && p.catch) p.catch(reserva);
+      }));
+    },
     /* fala uma lista de frases, uma de cada vez; devolve false se foi interrompida */
     async sequencia(lista) {
       const meu = ++this.token;
+      this.pararAudio();
       if (this.disponivel) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
       await esperar(120);
       for (const t of lista) {
@@ -132,7 +174,7 @@
       return [cab.join(';')].concat(linhas).join('\r\n') + '\r\n';
     },
     baixar() {
-      const blob = new Blob(['﻿' + this.texto()], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob(['\uFEFF' + this.texto()], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = 'registro_tentativas.txt';
       document.body.appendChild(a); a.click(); a.remove();
@@ -287,7 +329,9 @@
     const certo = q.opcoes.findIndex((o) => o.correta);
     $$('#qOpcoes .opt').forEach((b) => { b.classList.add('travado'); if (parseInt(b.dataset.i, 10) !== certo) b.classList.add('apagado'); });
     marcar(certo, true);
-    await Promise.all([Voz.sequencia(['Vamos ver juntos! A resposta certa é ' + (q.opcoes[certo].fala || q.opcoes[certo].rotulo) + '.', q.explicacao]), esperar(3500)]);
+    /* a frase é dividida em duas partes para casar com os áudios gravados:
+       "Vamos ver juntos! A resposta certa é" + o nome da opção correta */
+    await Promise.all([Voz.sequencia(['Vamos ver juntos! A resposta certa é', (q.opcoes[certo].fala || q.opcoes[certo].rotulo), q.explicacao]), esperar(3500)]);
     if (meu === estado.passo) proxima();
   }
 
